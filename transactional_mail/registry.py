@@ -28,6 +28,7 @@ class Registry:
         """Get the class for this name"""
         return self._registry.get(name)
 
+
 _default_registry = Registry() #pylint: disable=invalid-name
 
 def register(name):
