@@ -19,7 +19,6 @@ def style(names):
         _load_styles()
 
     css = ';'.join(_styles.get(name, '') for name in names.split())
-    print(css)
     return mark_safe('style="%s"' % css)
 
 
