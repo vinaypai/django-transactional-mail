@@ -1,5 +1,5 @@
 ## Requirements
-* `django` >= 1.11
+* `django` >= 2.2
 
 ## Quick Start
 Install `django-transactional-mail`
