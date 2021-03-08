@@ -4,7 +4,7 @@
 ## Quick Start
 Install `django-transactional-mail`
 ```
-pip install django-transactiona-mail
+pip install django-transactional-mail
 ```
 Add `transactional_mail` to `INSTALLED_APPS` in your project's `settings.py`.
 
