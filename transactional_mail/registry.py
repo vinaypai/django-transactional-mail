@@ -3,6 +3,7 @@ Implements a registry for previews similar to the ModelAdmin registry in
 the standard Django Admin app.
 """
 
+from typing import Type
 from .emails import Email
 
 class AlreadyRegistered(Exception):
@@ -33,7 +34,7 @@ _default_registry = Registry() #pylint: disable=invalid-name
 
 def register(name):
     """Register the given object the wrapped handler class"""
-    def wrapper(email_class):
+    def wrapper(email_class: Type[Email]) -> Type[Email]:
         if not issubclass(email_class, Email):
             raise ValueError("Wrapped class must subclass Email")
         _default_registry.register(name, email_class)

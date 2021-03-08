@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='django-transactional-mail',
-    version='0.1.5',
+    version='0.2',
     author='Vinay Pai',
     author_email='vinay@vinaypai.com',
     description='Transactional emails in Django projects made easy',
@@ -25,7 +25,6 @@ setuptools.setup(
         'Topic :: Communications :: Email',
     ],
     install_requires=[
-        'beautifulsoup4 >= 4.9.1',
         'django >= 2.2',
         'django-render-block >= 0.5',
         'html2text >= 2017',
