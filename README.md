@@ -21,3 +21,18 @@ Run migrations in your project to create the models for the CMS app.
 ```
 ./manage.py migrate transactional_mail
 ```
+
+
+## Distributing and update
+
+Build an sdist to ensure that the templates are included:
+
+```
+python -m build --sdist
+```
+
+Publish to pypi
+
+```
+python3 -m twine upload dist/*
+```

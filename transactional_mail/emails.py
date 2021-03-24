@@ -1,4 +1,5 @@
 """Base classes for transactional emails"""
+import re
 from urllib.parse import urljoin
 
 from django.conf import settings
@@ -25,7 +26,9 @@ class Email:
         ctx = {'BASE_URL': settings.BASE_URL, **ctx}
         self.ctx = ctx
 
-        self.subject = render_block_to_string(self.template, 'subject', ctx).strip()
+        # Templates can end up with unwanted newlines. Convert them all to spaces
+        self.subject: str = render_block_to_string(self.template, 'subject', ctx).strip()
+        self.subject = re.sub(r'\s+', ' ', self.subject)
 
         # Make links absolute
         self.html = render_block_to_string(self.template, 'html', ctx)
