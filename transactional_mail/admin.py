@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 from django.contrib import admin
+from django.core.paginator import Paginator
 from django.urls import path
 from django.template.response import TemplateResponse
 from django.template.loader import render_to_string
@@ -11,8 +12,8 @@ from .registry import _default_registry
 
 @admin.register(SentMail)
 class SentMailAdmin(admin.ModelAdmin):
-    list_display = ('subject', 'email_address', 'user', 'timestamp')
-
+    list_display = ('timestamp', 'class_name', 'subject', 'email_address', 'user',)
+    list_filter = ('timestamp', 'class_name', 'email_address')
 
 
 class RegisteredEmailType(SentMail):
@@ -20,8 +21,15 @@ class RegisteredEmailType(SentMail):
         proxy = True
 
 
+class RegisteredEmailPaginator(Paginator):
+    @property
+    def count(self):
+        return len(_default_registry._registry)
+
 @admin.register(RegisteredEmailType)
 class RegisteredEmailAdmin(admin.ModelAdmin):
+    paginator = RegisteredEmailPaginator
+
     def changelist_view(self, request, **kwargs):
         response = super().changelist_view(request, **kwargs)
         response.context_data['summary'] = _default_registry._registry.keys()
