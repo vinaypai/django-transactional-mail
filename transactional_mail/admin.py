@@ -1,10 +1,13 @@
 from bs4 import BeautifulSoup
 from django.contrib import admin
 from django.core.paginator import Paginator
-from django.urls import path
+from django.urls import path, reverse
 from django.template.response import TemplateResponse
 from django.template.loader import render_to_string
 from django.http.response import HttpResponse, Http404
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
+from django.views.decorators.clickjacking import xframe_options_exempt
 
 from .models import SentMail
 from . import registry
@@ -14,7 +17,33 @@ from .registry import _default_registry
 class SentMailAdmin(admin.ModelAdmin):
     list_display = ('timestamp', 'class_name', 'subject', 'email_address', 'user',)
     list_filter = ('timestamp', 'class_name', 'email_address')
+    readonly_fields = ('html_view', )
+    exclude = ('html_body', )
 
+    def has_change_permission(self, request, obj=None) -> bool:
+        return False
+
+    def get_urls(self):
+        urls = [
+            path(
+                '<int:sentmail_id>/html_body/',
+                self.admin_site.admin_view(self.get_html_body),
+                name="transactional_mail_sentmail_htmlbody"
+            )
+        ]
+        return urls + super().get_urls()
+
+    def html_view(self, obj):
+        return format_html(
+            '<iframe width="720" height="300" src="{}"></iframe>',
+            reverse('admin:transactional_mail_sentmail_htmlbody', kwargs={'sentmail_id': obj.pk})
+        )
+    html_view.short_description = 'html_body'
+
+    @xframe_options_exempt
+    def get_html_body(self, request, sentmail_id):
+        obj = SentMail.objects.get(pk=sentmail_id)
+        return HttpResponse(obj.html_body)
 
 class RegisteredEmailType(SentMail):
     class Meta:
