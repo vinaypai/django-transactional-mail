@@ -1,3 +1,4 @@
 django-render-block >=0.5,<1
 html2text >=2017
 cssutils >= 1.0.2,<2
+beautifulsoup4 >= 4.9

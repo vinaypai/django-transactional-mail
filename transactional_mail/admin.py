@@ -13,6 +13,7 @@ from .models import SentMail
 from . import registry
 from .registry import _default_registry
 
+
 @admin.register(SentMail)
 class SentMailAdmin(admin.ModelAdmin):
     list_display = ('timestamp', 'class_name', 'subject', 'email_address', 'user',)
@@ -45,6 +46,7 @@ class SentMailAdmin(admin.ModelAdmin):
         obj = SentMail.objects.get(pk=sentmail_id)
         return HttpResponse(obj.html_body)
 
+
 class RegisteredEmailType(SentMail):
     class Meta:
         proxy = True
@@ -55,12 +57,15 @@ class RegisteredEmailPaginator(Paginator):
     def count(self):
         return len(_default_registry._registry)
 
+
 @admin.register(RegisteredEmailType)
 class RegisteredEmailAdmin(admin.ModelAdmin):
     paginator = RegisteredEmailPaginator
 
     def changelist_view(self, request, **kwargs):
         response = super().changelist_view(request, **kwargs)
+        if not response.context_data:
+            response.context_data = {}
         response.context_data['summary'] = _default_registry._registry.keys()
 
         return response
@@ -68,9 +73,9 @@ class RegisteredEmailAdmin(admin.ModelAdmin):
     def get_urls(self):
         urls = [
             path('<slug:name>/preview/',
-                self.admin_site.admin_view(self.preview),
-                name="transactional_mail_preview"
-            )
+                 self.admin_site.admin_view(self.preview),
+                 name="transactional_mail_preview"
+                 )
         ] + super().get_urls()
         return urls
 

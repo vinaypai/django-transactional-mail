@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='django-transactional-mail',
-    version='0.2.7',
+    version='0.2.8',
     author='Vinay Pai',
     author_email='vinay@vinaypai.com',
     description='Transactional emails in Django projects made easy',
@@ -31,7 +31,7 @@ setuptools.setup(
         'django >= 2.2',
         'django-render-block >= 0.5',
         'html2text >= 2017',
-        'cssutils >= 1.0.2'
+        'cssutils >= 1.0.2',
+        'beautifulsoup4 >= 4.9'
     ]
 )
-
