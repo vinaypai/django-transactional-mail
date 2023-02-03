@@ -2,6 +2,7 @@
 import re
 from urllib.parse import urljoin
 
+from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.core.mail import mail_admins
 from django.core.mail import send_mail
@@ -86,9 +87,18 @@ class UserEmail(Email):
     def __init__(self, ctx, user):
         self.user = user
         ctx = {'user': user, **ctx}
-
         super().__init__(ctx, user.email)
 
+    @classmethod
+    def get_for_preview(cls, request):
+        if user_id := request.GET.get('user_id', None):
+            user = get_user_model().objects.get(pk=user_id)
+        else:
+            user = request.user
+
+        print(user, "Foo")
+
+        return cls({}, user)
 
 class AdminEmail(Email):
     def __init__(self, ctx):
