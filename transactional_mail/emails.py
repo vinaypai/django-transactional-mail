@@ -24,25 +24,42 @@ class Email:
 
         self.to_email = to_email
 
-        ctx = {'BASE_URL': settings.BASE_URL, **ctx}
+        ctx = {
+            'BASE_URL': settings.BASE_URL, **ctx
+        }
+
         self.ctx = ctx
 
+    @property
+    def subject(self):
         # Templates can end up with unwanted newlines. Convert them all to spaces
-        self.subject: str = render_block_to_string(self.template, 'subject', ctx).strip()
-        self.subject = re.sub(r'\s+', ' ', self.subject)
+        subject: str = render_block_to_string(self.template, 'subject', self.ctx).strip()
+        subject = re.sub(r'\s+', ' ', subject)
+        return subject
 
+    @property
+    def html(self):
         # Make links absolute
-        self.html = render_block_to_string(self.template, 'html', ctx)
-        self._make_links_absolute()
+        html = render_block_to_string(self.template, 'html', self.ctx)
+        root = ElementTree.fromstring(html)
 
+        for att in ('src', 'href'):
+            for tag in root.findall(f'.//*[@{att}]'):
+                tag.attrib[att] = urljoin(settings.BASE_URL, tag.attrib[att])
+
+        html = ElementTree.tostring(root, method="html", encoding="unicode")
+        return html
+
+    @property
+    def plain(self) -> str:
         try:
-            self.plain = render_block_to_string(self.template, 'plain', ctx).strip()
+            return render_block_to_string(self.template, 'plain', self.ctx).strip()
         except BlockNotFound:
             h = HTML2Text()
             h.ignore_images = True
             h.ignore_emphasis = True
             h.ignore_tables = True
-            self.plain = h.handle(self.html)
+            return h.handle(self.html)
 
     def send(self):
         send_mail(
@@ -73,15 +90,6 @@ class Email:
     def get_for_preview(cls, request):
         return cls({}, 'nobody@example.com')
 
-    def _make_links_absolute(self):
-        """Make all src and href attrs in the html document absolute"""
-        root = ElementTree.fromstring(self.html)
-
-        for att in ('src', 'href'):
-            for tag in root.findall(f'.//*[@{att}]'):
-                tag.attrib[att] = urljoin(settings.BASE_URL, tag.attrib[att])
-
-        self.html = ElementTree.tostring(root, method="html", encoding="unicode")
 
 class UserEmail(Email):
     def __init__(self, ctx, user):
@@ -95,8 +103,6 @@ class UserEmail(Email):
             user = get_user_model().objects.get(pk=user_id)
         else:
             user = request.user
-
-        print(user, "Foo")
 
         return cls({}, user)
 
