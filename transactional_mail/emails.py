@@ -18,14 +18,14 @@ class Email:
     from_email = settings.DEFAULT_FROM_EMAIL
     user = None
 
-    def __init__(self, ctx, to_email):
+    def __init__(self, to_email, extra_ctx={}):
         if self.template is None:
             raise ProgrammingError("Email subclasses must set template")
 
         self.to_email = to_email
 
         ctx = {
-            'BASE_URL': settings.BASE_URL, **ctx
+            'BASE_URL': settings.BASE_URL, **extra_ctx
         }
 
         self.ctx = ctx
@@ -88,14 +88,14 @@ class Email:
 
     @classmethod
     def get_for_preview(cls, request):
-        return cls({}, 'nobody@example.com')
+        return cls('nobody@example.com')
 
 
 class UserEmail(Email):
-    def __init__(self, ctx, user):
+    def __init__(self, user, extra_ctx={}):
         self.user = user
-        ctx = {'user': user, **ctx}
-        super().__init__(ctx, user.email)
+        ctx = {'user': user, **extra_ctx}
+        super().__init__(user.email, ctx)
 
     @classmethod
     def get_for_preview(cls, request):
@@ -104,7 +104,7 @@ class UserEmail(Email):
         else:
             user = request.user
 
-        return cls({}, user)
+        return cls(user)
 
 class AdminEmail(Email):
     def __init__(self, ctx):
